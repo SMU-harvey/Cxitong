@@ -1,0 +1,380 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<conio.h>
+#include<string.h>
+
+/* run this program using the console pauser or add your own getch, system("pause") or input loop */
+int flag,cishu=0;
+struct student{
+    __int64 num;
+    char name[10];
+    char sex[10];
+    char web[10];
+    char add[20];    
+}stu[100];
+void reg(char username[],char password[]){
+	FILE *f;       //定义一个名为f的指针，属于FILE类型  FILE是一类特殊指针，用来操作文件 
+	char user[100],pass[100];
+	int a;
+	f=fopen("userinformation.txt","a+");   	//调用fopen()函数，打开 userinformation.txt文件
+	while(fscanf(f,"%s\t%s",user,pass)!=EOF){
+		if(strcmp(user,username)==0){
+			a=1;
+			if(a==1){
+				printf("该用户已存在\n");
+				exit(0);
+				getch();
+			}
+		}
+	} 
+	fprintf(f,"%s\t%s\n",username,password);
+	fclose(f);	    //关闭文件，相当于保存文件，和fopen相对应 
+}
+//以只读方式打开一个名为：userinformation.txt的文件 
+int login(char username[],char password[]){ 
+	FILE *f;
+	char user[100],pass[100];
+	int z,w; 
+	flag=0;        //登录失败
+	f=fopen("userinformation.txt","r");
+	while(fscanf(f,"%s%s",user,pass)!=EOF){
+		if(strcmp(username,user)==0 && strcmp(password,pass)==0){
+			flag=1;
+			printf("登录成功!\n");
+			getch();
+			break;
+		}
+	}
+	if(flag==0){
+		cishu++;
+		if(cishu==3){
+			printf("密码错误3次!\n");
+			printf("即将退出系统\n");
+			exit(0);
+			getch();
+		} 
+		printf("登录失败!\n");
+	    printf("请重新输入密码：");
+	    z=0;
+	    for(;(w=getch())!='\r';){			//回车 
+	    	if(w=='\b' && z>0){             //神奇的退格 
+	    		--z;
+	    		putchar('\b');
+	    		putchar(' ');
+	    		putchar('\b');
+			}
+			else if(isprint(w)){
+				password[z++]=w;
+			    putchar('*');             //使输入的密码显示为* 
+			}
+		}
+		printf("\n");
+	    login(username,password);
+	}
+	return flag;
+	fclose(f);
+}
+void menu(){
+	system("CLS");     //清屏 (遇到多次输出) 
+	printf("------------------------------------------------------------------------------\n");
+	printf("|                                                                            |\n");
+	printf("|                               主菜单                                       |\n");
+	printf("|                                                                            |\n");
+    printf("|                             0.显示菜单                                     |\n");
+	printf("|                                                                            |\n");
+	printf("|                             1.修改密码                                     |\n");
+	printf("|                                                                            |\n");
+	printf("|                             2.录入                                         |\n");
+	printf("|                                                                            |\n");
+	printf("|                             3.删除                                         |\n");
+	printf("|                                                                            |\n");
+	printf("|                             4.修改                                         |\n");
+	printf("|                                                                            |\n");	
+	printf("|                             5.显示所有                                     |\n");
+	printf("|                                                                            |\n");	        
+	printf("|                             6.查询个人信息                                 |\n");        
+	printf("|                                                                            |\n");	
+	printf("|                             7.查询重名名单                                 |\n");
+	printf("|                                                                            |\n");	
+	printf("|                             8.查询单身名单                                 |\n");
+	printf("|                                                                            |\n");
+	printf("|                             9.安全退出                                     |\n");
+	printf("|                                                                            |\n");
+	printf("------------------------------------------------------------------------------\n");	
+	printf("请输入：");
+}
+int changePassward(char username[],char password[]){
+	FILE *f;
+	f=fopen("userinformation.txt","r+");                            //打开一个用于读/写的文本文件
+    char temp_mima[20],temp_mima1[20],temp_mima2[20];
+    printf("请输入原来的密码：");
+    loop:scanf("%s",temp_mima);      //为了配合goto语句而给某行程序起的名字（标号）
+    while(flag=1){  
+	     if(strcmp(temp_mima,password)==0){       //与原始密码对比验证 
+        	printf("密码正确！\n"); 
+         	printf("请输入新密码：\n");
+         	scanf("%s",temp_mima1);
+         	printf("请再次输入密码：\n");
+         	scanf("%s",temp_mima2);
+         	if(strcmp(temp_mima1,temp_mima2)==0){          //输入的两个密码一致 
+                printf("您已成功修改密码！请牢记密码!\n");
+				printf("请退出重新登录！\n");
+				fprintf(f,"%s %s\n",username,temp_mima1);
+				break;
+         	}
+         	else{
+             	printf("两次输入的密码不一致！修改失败！\n");
+				printf("请输入原来的密码：\n");    
+             	goto loop;       //跳出循环。  实现用户输出错误密码了，重新输入密码。 
+             	break;
+         	}
+        }
+      	else{
+          printf("输入的密码错误！\n");
+          printf("请输入原来的密码：\n");
+          goto loop;         //跳出循环。  实现用户输出错误密码了，重新输入密码。
+          break; 
+	    }
+    }
+    fclose(f);
+    return flag=1;
+} 
+void save(){
+	FILE *f;
+	int num,i;
+	f=fopen("people.txt","a+");        //打开一个用于读/写的文本文件 
+	system("CLS");                      //清屏
+	printf("请输入需要录入的人数:");
+	scanf("%d",&num);
+	for(i=0;i<num;i++){	
+		printf("请输入身份证号\n");
+		scanf("%I64d",&stu[i].num);
+		printf("请输入姓名\n");
+		scanf("%s",stu[i].name);
+		printf("请输入性别\n");
+		scanf("%s",stu[i].sex);
+		printf("请输入婚姻状况\n");
+		scanf("%s",stu[i].web); 
+		printf("请输入籍贯\n");
+		scanf("%s",stu[i].add);
+		fprintf(f,"%I64d %s %s %s %s\n",stu[i].num,stu[i].name,stu[i].sex,stu[i].web,stu[i].add);       //将数据存入文件 
+	}
+	printf("成功录入\n"); 
+	fclose(f);	
+}
+void del(){
+	FILE *f;
+	__int64 num,i=0,j;
+	f=fopen("people.txt","r");       //打开一个用于读的文本文件 
+	printf("请谨慎操作\n"); 
+	while(fscanf(f,"%I64d %s %s %s %s",&stu[i].num,stu[i].name,stu[i].sex,&stu[i].web,stu[i].add)!=EOF){
+		i++;
+	}
+	fclose(f);
+	f=fopen("people.txt","w+");
+	printf("请输入身份证号\n");
+	scanf("%I64d",&num);
+	for(j=0;j<i;j++){
+		if(stu[j].num!=num){
+			fprintf(f,"%I64d %s %s %s %s\n",stu[j].num,stu[j].name,stu[j].sex,stu[j].web,stu[j].add);	
+		}		
+	}
+	printf("成功删除\n");
+	fclose(f);	
+}      //将数据一个个删除 
+void change(){
+	FILE *f;
+	__int64 num,i=0,j,k,d=0;
+	char n[20]; 
+	f=fopen("people.txt","r");         //打开一个用于读的文本文件 
+	printf("请谨慎操作\n"); 
+	while(fscanf(f,"%I64d %s %s %s %s",&stu[i].num,stu[i].name,stu[i].sex,stu[i].web,stu[i].add)!=EOF){
+		i++;            //跳到数组的下一位去存 
+	}
+	fclose(f);
+	f=fopen("people.txt","w+");
+	printf("请输入身份证号\n");
+	loop:scanf("%I64d",&num);
+	for(k=0;k<i;k++){
+		if(stu[k].num==num){
+			d=1;
+			break;
+		}
+	}
+	if(d==1){
+		printf("身份证号码正确\n");
+		printf("请输入需要修改的原姓名，原性别，原婚姻状况或原籍贯:");
+		scanf("%s",n);
+		for(j=0;j<i;j++){
+	    	if(strcmp(stu[j].name,n)==0){
+			    printf("请输入要修改的姓名：\n");
+			    scanf("%s",stu[j].name);
+		    }
+		    else if(strcmp(stu[j].sex,n)==0){
+			    printf("请输入要修改的性别：\n");
+			    scanf("%s",stu[j].sex);
+		    }
+		    else if(strcmp(stu[j].web,n)==0){
+			    printf("请输入要修改的婚姻状况：\n");
+			    scanf("%s",stu[j].web);
+		    }
+		    else if(strcmp(stu[j].add,n)==0){
+			    printf("请输入要修改的籍贯：\n");
+			    scanf("%s",stu[j].add);
+		    }
+		    fprintf(f,"%I64d %s %s %s %s\n",stu[j].num,stu[j].name,stu[j].sex,stu[j].web,stu[j].add);
+		}
+		printf("修改完成\n");
+	}
+	else{
+	    printf("身份证号码错误\n");
+	    printf("请重新输入身份证\n");
+	    goto loop;
+	} 	
+	fclose(f);
+}
+void showAll(){
+	FILE *f;
+	int num,i=0;
+	f=fopen("people.txt","r");          //打开一个用于读的文本文件
+	while(fscanf(f,"%I64d %s %s %s %s",&stu[i].num,stu[i].name,stu[i].sex,stu[i].web,stu[i].add)!=EOF){ 
+        printf("身份证号:%I64d\t姓名:%s\t性别:%s\t婚姻状况:%s\t籍贯:%s\t",stu[i].num,stu[i].name,stu[i].sex,stu[i].web,stu[i].add);
+        printf("\n");
+        i++;
+    }
+    fclose(f);	
+}
+void find1(){
+	FILE *f;
+	__int64 num,i=0;
+	f=fopen("people.txt","r");         //打开一个用于读的文本文件
+	printf("请输入身份证号\n");
+	scanf("%I64d",&num);
+	printf("有关此人的相关信息:\n");
+	while(fscanf(f,"%I64d %s %s %s %s",&stu[i].num,stu[i].name,stu[i].sex,stu[i].web,stu[i].add)!=EOF){	
+		if(stu[i].num==num){
+			printf("身份证号:%I64d\t姓名:%s\t性别:%s\t婚姻状况:%s\t籍贯:%s\t",stu[i].num,stu[i].name,stu[i].sex,stu[i].web,stu[i].add);
+			printf("\n");
+		}
+		i++;
+	}
+	fclose(f);
+}
+void find2(){
+	FILE *f;
+	int i=0;
+	char dizhi[20],mingzi[20];
+	f=fopen("people.txt","r");         //打开一个用于读的文本文件
+	printf("请输入籍贯\n");
+	scanf("%s",dizhi);
+	printf("请输入姓名\n");
+	scanf("%s",mingzi);
+	printf("重名人员名单：\n"); 
+	while(fscanf(f,"%I64d %s %s %s %s",&stu[i].num,stu[i].name,stu[i].sex,stu[i].web,stu[i].add)!=EOF){	
+		if(strcmp(stu[i].add,dizhi)==0 && strcmp(stu[i].name,mingzi)==0){
+			printf("身份证号:%I64d\t姓名:%s\t性别:%s\t婚姻状况:%s\t籍贯:%s\t",stu[i].num,stu[i].name,stu[i].sex,stu[i].web,stu[i].add);
+			printf("\n");
+		}
+		i++;
+	}
+	fclose(f);
+}
+void find3(){
+	FILE *f;
+	int i=0;
+	char hunyin[20]; 
+	f=fopen("people.txt","r");
+	printf("请输入婚姻状况\n");
+	scanf("%s",hunyin);
+	printf("单身贵族名单:\n");
+	while(fscanf(f,"%I64d %s %s %s %s",&stu[i].num,stu[i].name,stu[i].sex,stu[i].web,stu[i].add)!=EOF){
+		
+		if(strcmp(stu[i].web,hunyin)==0){
+			printf("身份证号:%I64d\t姓名:%s\t性别:%s\t婚姻状况:%s\t籍贯:%s\t\n",stu[i].num,stu[i].name,stu[i].sex,stu[i].web,stu[i].add);
+		}
+	}
+} 
+int main(int argc, char *argv[]){
+	char username[100],password[100];
+	int code,z,w;
+	printf("        welcome to 户籍管理系统         \n");
+	printf("----------------------------------------\n");
+	printf("|                 1.注册               |\n");
+	printf("|                 2.登陆               |\n");
+	printf("----------------------------------------\n");	
+	printf("请输入：");
+	scanf("%d",&code);
+	switch(code){
+		case 1:printf("请输入账号：");
+	           scanf("%s",username);
+	           printf("请输入密码：");
+	           scanf("%s",password);
+		reg(username,password);
+		printf("注册成功！\n");
+		printf("请登录\n"); 
+		printf("请输入账号：");
+	    scanf("%s",username);
+	    printf("请输入密码：");
+	    scanf("%s",password);
+		login(username,password);
+		if(flag==1){
+			menu();
+			while(scanf("%d",&code)!=EOF){ 
+				switch(code){
+					case 0:menu();break;
+					case 1:changePassward(username,password);break;
+					case 2:save();break;
+					case 3:del();break;
+					case 4:change();break;
+					case 5:showAll();break;
+					case 6:find1();break;
+					case 7:find2();break;
+					case 8:find3();break;
+					case 9:exit(0);break;	
+					default:printf("输入有误！");
+				}	
+			}	
+		}
+		break;
+		case 2:printf("请输入账号：");
+	           scanf("%s",username);
+	           printf("请输入密码：");
+	           z=0;
+	           getchar();
+	           for(;(w=getch())!='\r';){			//回车 
+	    	        if(w=='\b' && z>0){             //神奇的退格 
+	    		        --z;
+	    		        putchar('\b');
+	    		        putchar(' ');
+	    		        putchar('\b');
+			        }
+			        else if(isprint(w)){
+				        password[z++]=w;
+			        	putchar('*');             //使输入的密码显示为*
+			        }
+		        }
+		        printf("\n");
+	    login(username,password);
+		if(flag==1){
+			menu();
+			while(scanf("%d",&code)!=EOF){    
+				switch(code){
+				    case 0:menu();break;
+					case 1:changePassward(username,password);break;
+					case 2:save();break;
+					case 3:del();break;
+					case 4:change();break;
+					case 5:showAll();break;
+					case 6:find1();break;
+					case 7:find2();break;
+					case 8:find3();break;
+					case 9:exit(0);break;	
+					default:printf("输入有误！");
+				}	
+			}	
+		}
+		break;	
+		default:printf("输入代码有误！");
+	}
+	return 0;
+}
